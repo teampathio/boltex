@@ -68,6 +68,11 @@ defmodule Boltex.Client.Api do
     get(client, "conversations.list", arguments)
   end
 
+  @impl true
+  def users_list(client, arguments \\ %{}) do
+    get(client, "users.list", arguments)
+  end
+
   defp post(client, operation, params) do
     url = "#{client.base_url}/#{operation}"
     request(:post, client, url, params)

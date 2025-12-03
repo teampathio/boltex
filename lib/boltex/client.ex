@@ -181,4 +181,33 @@ defmodule Boltex.Client do
   def conversations_list(client, arguments \\ %{}) do
     adapter().conversations_list(client, arguments)
   end
+
+  @doc """
+  List all users in a Slack workspace.
+
+  https://api.slack.com/methods/users.list
+
+  ## Arguments
+  - `arguments` - Map of arguments (e.g., `%{limit: 100, cursor: "..."}` for pagination)
+
+  ## Returns
+  Returns `{:ok, response}` where response contains:
+  - `"members"` - List of user objects
+  - `"response_metadata"` - Contains `"next_cursor"` for pagination if there are more results
+
+  ## Example
+      case Boltex.Client.users_list(client) do
+        {:ok, %{"members" => members}} ->
+          # Filter out bots and deleted users
+          active_users = Enum.filter(members, fn user ->
+            !user["is_bot"] && !user["deleted"]
+          end)
+
+        {:error, reason} ->
+          # Handle error
+      end
+  """
+  def users_list(client, arguments \\ %{}) do
+    adapter().users_list(client, arguments)
+  end
 end

@@ -59,4 +59,7 @@ defmodule Boltex.ClientBehaviour do
               arguments :: map()
             ) ::
               {:ok, slack_response()} | {:error, error_reason()}
+
+  @callback users_list(client :: Boltex.Client.t(), arguments :: map()) ::
+              {:ok, slack_response()} | {:error, error_reason()}
 end
