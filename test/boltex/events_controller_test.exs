@@ -204,4 +204,125 @@ defmodule Boltex.EventsControllerTest do
       assert Jason.decode!(conn.resp_body) == %{"text" => "Handled"}
     end
   end
+
+  describe "handle/2 slash commands with halting middleware" do
+    test "returns empty 200 when middleware halts sync event", %{signing_secret: signing_secret} do
+      Boltex.MockRepo
+      |> expect(:one, fn _ -> "xoxb-token" end)
+
+      defmodule HaltingMiddleware do
+        def call(_ctx, _event, _opts), do: {:halt, "stopped"}
+      end
+
+      defmodule HaltedApp do
+        def middleware, do: [Boltex.EventsControllerTest.HaltingMiddleware]
+        def event_handlers, do: []
+      end
+
+      body =
+        Jason.encode!(%{
+          command: "/test",
+          text: "hello",
+          team_id: "T123",
+          user_id: "U123",
+          user_name: "testuser",
+          channel_id: "C123",
+          channel_name: "general",
+          team_domain: "test",
+          response_url: "https://hooks.slack.com/commands/123/456",
+          trigger_id: "123.456"
+        })
+
+      conn = build_conn(body, signing_secret)
+      conn = put_private(conn, :boltex_app, HaltedApp)
+
+      log =
+        capture_log(fn ->
+          conn = EventsController.handle(conn, conn.params)
+
+          assert conn.status == 200
+          assert conn.resp_body == ""
+        end)
+
+      assert log =~ "halted"
+    end
+  end
+
+  describe "handle/2 with ack()" do
+    test "returns empty 200 when handler calls ack()", %{signing_secret: signing_secret} do
+      Boltex.MockRepo
+      |> expect(:one, fn _ -> "xoxb-token" end)
+
+      defmodule AckHandler do
+        import Boltex.Actions
+
+        def handle_sync(_event, _ctx), do: ack()
+        def handle_async(_event, _ctx), do: :ok
+      end
+
+      defmodule AckApp do
+        def middleware, do: []
+        def event_handlers, do: [Boltex.EventsControllerTest.AckHandler]
+      end
+
+      body =
+        Jason.encode!(%{
+          command: "/test",
+          text: "hello",
+          team_id: "T123",
+          user_id: "U123",
+          user_name: "testuser",
+          channel_id: "C123",
+          channel_name: "general",
+          team_domain: "test",
+          response_url: "https://hooks.slack.com/commands/123/456",
+          trigger_id: "123.456"
+        })
+
+      conn = build_conn(body, signing_secret)
+      conn = put_private(conn, :boltex_app, AckApp)
+      conn = EventsController.handle(conn, conn.params)
+
+      assert conn.status == 200
+      assert conn.resp_body == ""
+    end
+
+    test "returns JSON response when handler calls ack(text)", %{signing_secret: signing_secret} do
+      Boltex.MockRepo
+      |> expect(:one, fn _ -> "xoxb-token" end)
+
+      defmodule AckTextHandler do
+        import Boltex.Actions
+
+        def handle_sync(_event, _ctx), do: ack("Got it!")
+        def handle_async(_event, _ctx), do: :ok
+      end
+
+      defmodule AckTextApp do
+        def middleware, do: []
+        def event_handlers, do: [Boltex.EventsControllerTest.AckTextHandler]
+      end
+
+      body =
+        Jason.encode!(%{
+          command: "/test",
+          text: "hello",
+          team_id: "T123",
+          user_id: "U123",
+          user_name: "testuser",
+          channel_id: "C123",
+          channel_name: "general",
+          team_domain: "test",
+          response_url: "https://hooks.slack.com/commands/123/456",
+          trigger_id: "123.456"
+        })
+
+      conn = build_conn(body, signing_secret)
+      conn = put_private(conn, :boltex_app, AckTextApp)
+      conn = EventsController.handle(conn, conn.params)
+
+      assert conn.status == 200
+      assert Jason.decode!(conn.resp_body) == %{"text" => "Got it!"}
+    end
+  end
 end

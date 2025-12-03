@@ -21,15 +21,24 @@ defmodule Boltex.Actions do
   Acknowledge an interactive event (button click, slash command, etc).
 
   Must be returned from `handle_sync/2` to acknowledge receipt within 3 seconds.
-  Returns an empty response body.
 
-  ## Example
-      def handle_sync(%Action{action: %{action_id: "button_click"}}, ctx) do
-        # Do some work...
+  ## Arguments
+  - No arguments: Returns empty response body (HTTP 200 with no content)
+  - String: Returns a simple text response visible to the user
+
+  ## Examples
+      # Empty acknowledgment (no visible response)
+      def handle_sync(%Action{}, ctx) do
         ack()
       end
+
+      # Simple text response
+      def handle_sync(%Command{}, ctx) do
+        ack("Got it!")
+      end
   """
-  def ack(), do: {:ok, %{}}
+  def ack(), do: {:ok, ""}
+  def ack(text) when is_binary(text), do: {:ok, %{text: text}}
 
   @doc """
   Send a message to the event's channel.

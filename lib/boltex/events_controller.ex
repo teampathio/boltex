@@ -47,7 +47,9 @@ defmodule Boltex.EventsController do
 
     if allows_sync_response?(params) do
       case process_event(params, app_module, :sync) do
+        {:ok, ""} -> send_resp(conn, 200, "")
         {:ok, response} -> json(conn, response)
+        :ok -> send_resp(conn, 200, "")
         :ignore -> send_resp(conn, 200, "")
         {:error, reason} -> json(conn |> put_status(500), %{error: reason})
       end
