@@ -27,6 +27,11 @@ defmodule Boltex.Client.Api do
   end
 
   @impl true
+  def chat_get_permalink(client, channel, message_ts) do
+    get(client, "chat.getPermalink", %{channel: channel, message_ts: message_ts})
+  end
+
+  @impl true
   def views_publish(client, user_id, view, arguments \\ %{}) do
     arguments =
       arguments

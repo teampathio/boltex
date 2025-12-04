@@ -24,6 +24,13 @@ defmodule Boltex.ClientBehaviour do
             ) ::
               {:ok, slack_response()} | {:error, error_reason()}
 
+  @callback chat_get_permalink(
+              client :: Boltex.Client.t(),
+              channel :: String.t(),
+              message_ts :: String.t()
+            ) ::
+              {:ok, slack_response()} | {:error, error_reason()}
+
   @callback views_publish(
               client :: Boltex.Client.t(),
               user_id :: String.t(),

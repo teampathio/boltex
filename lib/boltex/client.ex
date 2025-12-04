@@ -105,6 +105,33 @@ defmodule Boltex.Client do
   end
 
   @doc """
+  Retrieve a permalink URL for a specific message.
+
+  https://docs.slack.dev/reference/methods/chat.getPermalink
+
+  ## Arguments
+  - `channel` - Channel ID containing the message (required)
+  - `message_ts` - Message timestamp (required)
+
+  ## Returns
+  Returns `{:ok, response}` where response contains:
+  - `"permalink"` - The permalink URL for the message
+  - `"channel"` - The channel ID
+
+  ## Example
+      case Boltex.Client.chat_get_permalink(client, "C1234567890", "1234567890.123456") do
+        {:ok, %{"permalink" => url}} ->
+          # Use the permalink URL
+
+        {:error, reason} ->
+          # Handle error
+      end
+  """
+  def chat_get_permalink(client, channel, message_ts) do
+    adapter().chat_get_permalink(client, channel, message_ts)
+  end
+
+  @doc """
   Publish a view to App Home.
 
   https://docs.slack.dev/reference/methods/views.publish
