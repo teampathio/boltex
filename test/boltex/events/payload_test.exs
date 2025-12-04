@@ -267,5 +267,58 @@ defmodule Boltex.Events.PayloadTest do
       assert action.view["callback_id"] == "view_identifier"
       assert action.container["type"] == "view"
     end
+
+    test "creates Action struct from block_actions payload with channels_select" do
+      payload = %{
+        "type" => "block_actions",
+        "user" => %{
+          "id" => "U123ABC456",
+          "username" => "testuser",
+          "name" => "testuser",
+          "team_id" => "T123ABC456"
+        },
+        "api_app_id" => "A123ABC456",
+        "token" => "verification_token",
+        "container" => %{
+          "type" => "message",
+          "message_ts" => "1548261231.000200",
+          "channel_id" => "C123ABC456",
+          "is_ephemeral" => false
+        },
+        "trigger_id" => "123456.789.abc",
+        "team" => %{
+          "id" => "T123ABC456",
+          "domain" => "example"
+        },
+        "channel" => %{
+          "id" => "C123ABC456",
+          "name" => "general"
+        },
+        "actions" => [
+          %{
+            "type" => "channels_select",
+            "action_id" => "select_bravo_channel",
+            "block_id" => "OL6HY",
+            "selected_channel" => "C0A0M9BUSRK",
+            "initial_channel" => "C0A0PDENE77",
+            "action_ts" => "1764852964.117788"
+          }
+        ]
+      }
+
+      assert %Payload.Action{} = action = Payload.new(payload)
+      assert action.type == "block_actions"
+      assert action.user_id == "U123ABC456"
+      assert action.channel_id == "C123ABC456"
+      assert action.trigger_id == "123456.789.abc"
+
+      assert %Payload.Action.ChannelsSelectAction{} = select = action.action
+      assert select.type == "channels_select"
+      assert select.action_id == "select_bravo_channel"
+      assert select.block_id == "OL6HY"
+      assert select.selected_channel == "C0A0M9BUSRK"
+      assert select.initial_channel == "C0A0PDENE77"
+      assert select.action_ts == "1764852964.117788"
+    end
   end
 end

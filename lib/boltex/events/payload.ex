@@ -117,9 +117,10 @@ defmodule Boltex.Events.Payload do
     """
 
     alias __MODULE__.ButtonAction
+    alias __MODULE__.ChannelsSelectAction
 
     # TODO: Add other action types to this union as they're implemented
-    @type action_element :: ButtonAction.t()
+    @type action_element :: ButtonAction.t() | ChannelsSelectAction.t()
 
     @type t :: %__MODULE__{
             type: String.t(),
@@ -161,11 +162,14 @@ defmodule Boltex.Events.Payload do
       ButtonAction.new(action_data)
     end
 
+    defp parse_action(%{"type" => "channels_select"} = action_data) do
+      ChannelsSelectAction.new(action_data)
+    end
+
     # TODO: Add parsers for other action types:
     # - StaticSelectAction (static_select)
     # - UsersSelectAction (users_select)
     # - ConversationsSelectAction (conversations_select)
-    # - ChannelsSelectAction (channels_select)
     # - ExternalSelectAction (external_select)
     # - MultiStaticSelectAction (multi_static_select)
     # - MultiUsersSelectAction (multi_users_select)
@@ -216,6 +220,43 @@ defmodule Boltex.Events.Payload do
           value: action_data["value"],
           text: action_data["text"],
           url: action_data["url"]
+        }
+      end
+    end
+
+    defmodule ChannelsSelectAction do
+      @moduledoc """
+      Represents a channels_select element action.
+
+      See: https://api.slack.com/reference/block-kit/block-elements#channel_select
+      """
+
+      @type t :: %__MODULE__{
+              type: String.t(),
+              action_id: String.t(),
+              block_id: String.t(),
+              action_ts: String.t(),
+              selected_channel: String.t(),
+              initial_channel: String.t() | nil
+            }
+
+      defstruct [
+        :type,
+        :action_id,
+        :block_id,
+        :action_ts,
+        :selected_channel,
+        :initial_channel
+      ]
+
+      def new(action_data) when is_map(action_data) do
+        %__MODULE__{
+          type: action_data["type"],
+          action_id: action_data["action_id"],
+          block_id: action_data["block_id"],
+          action_ts: action_data["action_ts"],
+          selected_channel: action_data["selected_channel"],
+          initial_channel: action_data["initial_channel"]
         }
       end
     end
