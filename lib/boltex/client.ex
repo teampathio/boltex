@@ -210,6 +210,33 @@ defmodule Boltex.Client do
   end
 
   @doc """
+  Open or resume a direct message or multi-person direct message.
+
+  https://api.slack.com/methods/conversations.open
+
+  ## Arguments
+  - `arguments` - Map of arguments. Must include either:
+    - `users` - Comma-separated list of user IDs (for opening a DM)
+    - `channel` - Channel ID (for resuming a conversation)
+
+  ## Returns
+  Returns `{:ok, response}` where response contains:
+  - `"channel"` - Object with the conversation details including `"id"`
+
+  ## Example
+      case Boltex.Client.conversations_open(client, %{users: "U123456"}) do
+        {:ok, %{"channel" => %{"id" => channel_id}}} ->
+          # Use channel_id for posting messages
+
+        {:error, reason} ->
+          # Handle error
+      end
+  """
+  def conversations_open(client, arguments \\ %{}) do
+    adapter().conversations_open(client, arguments)
+  end
+
+  @doc """
   List all users in a Slack workspace.
 
   https://api.slack.com/methods/users.list

@@ -74,6 +74,11 @@ defmodule Boltex.Client.Api do
   end
 
   @impl true
+  def conversations_open(client, arguments \\ %{}) do
+    post(client, "conversations.open", arguments)
+  end
+
+  @impl true
   def users_list(client, arguments \\ %{}) do
     get(client, "users.list", arguments)
   end

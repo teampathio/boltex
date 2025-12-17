@@ -56,6 +56,9 @@ defmodule Boltex.ClientBehaviour do
   @callback conversations_list(client :: Boltex.Client.t(), arguments :: map()) ::
               {:ok, slack_response()} | {:error, error_reason()}
 
+  @callback conversations_open(client :: Boltex.Client.t(), arguments :: map()) ::
+              {:ok, slack_response()} | {:error, error_reason()}
+
   @callback users_lookup_by_email(client :: Boltex.Client.t(), email :: String.t()) ::
               {:ok, slack_response()} | {:error, error_reason()}
 
